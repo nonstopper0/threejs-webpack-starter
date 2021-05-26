@@ -13,12 +13,13 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 // Objects
-const geometry = new THREE.TorusGeometry( .7, .2, 16, 100 );
+const geometry = new THREE.SphereGeometry(1, 50, 50)
 
 // Materials
 
-const material = new THREE.MeshBasicMaterial()
-material.color = new THREE.Color(0xff0000)
+const material = new THREE.MeshStandardMaterial()
+material.metalness = 1;
+material.color = new THREE.Color(0xb2b2b2);
 
 // Mesh
 const sphere = new THREE.Mesh(geometry,material)
@@ -31,6 +32,15 @@ pointLight.position.x = 2
 pointLight.position.y = 3
 pointLight.position.z = 4
 scene.add(pointLight)
+
+const pointLight2 = new THREE.PointLight(0xffffff, 2)
+pointLight2.position.set(10, 10, 10);
+scene.add(pointLight2)
+
+gui.add(pointLight2.position, 'y')
+gui.add(pointLight2.position, 'x')
+gui.add(pointLight2.position, 'z')
+gui.add(pointLight2, 'intensity')
 
 /**
  * Sizes
@@ -73,7 +83,8 @@ scene.add(camera)
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
+    canvas: canvas,
+    alpha: true
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
