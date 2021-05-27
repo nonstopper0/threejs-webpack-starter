@@ -12,35 +12,66 @@ const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
 
-// Objects
-const geometry = new THREE.SphereGeometry(1, 50, 50)
+// Loader 
 
-// Materials
-
-const material = new THREE.MeshStandardMaterial()
-material.metalness = 1;
-material.color = new THREE.Color(0xb2b2b2);
+const loader = new THREE.TextureLoader();
 
 // Mesh
-const sphere = new THREE.Mesh(geometry,material)
+const sphere = new THREE.Mesh(
+    new THREE.SphereGeometry(0.5, 32 ,32),
+    new THREE.MeshPhongMaterial({
+        map: loader.load('/earth.jpg'),
+        bumpMap: loader.load('./bump.jpg'),
+        bumpScale: 0.008,
+        specularMap: loader.load('./water.png'),
+        specular: new THREE.Color('grey'),
+        shininess: 4,
+        emissiveMap: loader.load('./lights.png'),
+        emissive: new THREE.Color('white')
+    })
+)
 scene.add(sphere)
+
+const cloudCover = new THREE.Mesh(
+    new THREE.SphereGeometry(.505, 32, 32),
+    new THREE.MeshPhongMaterial({
+        map: loader.load('./clouds.png'),
+        transparent: true
+    })
+)
+scene.add(cloudCover);
+
+const starField = new THREE.BufferGeometry;
+const particleCount = 5000;
+const posArray = new Float32Array(particleCount * 3);
+
+for (let i = 0; i < particleCount * 3; i++) {
+    posArray[i] = (Math.random() - 0.5) * (Math.random() * 5);
+}
+
+starField.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+const particlesMesh = new THREE.Points(
+    starField,
+    new THREE.PointsMaterial({
+        size: 0.001
+    })
+)
+
+scene.add(particlesMesh)
+
 
 // Lights
 
-const pointLight = new THREE.PointLight(0xffffff, 0.1)
-pointLight.position.x = 2
-pointLight.position.y = 3
-pointLight.position.z = 4
+const pointLight = new THREE.PointLight(0xffffff, 1)
+pointLight.position.set(10, 10, 10);
 scene.add(pointLight)
 
-const pointLight2 = new THREE.PointLight(0xffffff, 2)
-pointLight2.position.set(10, 10, 10);
-scene.add(pointLight2)
+gui.add(pointLight.position, 'y')
+gui.add(pointLight.position, 'x')
+gui.add(pointLight.position, 'z')
+gui.add(pointLight, 'intensity')
 
-gui.add(pointLight2.position, 'y')
-gui.add(pointLight2.position, 'x')
-gui.add(pointLight2.position, 'z')
-gui.add(pointLight2, 'intensity')
 
 /**
  * Sizes
@@ -75,9 +106,10 @@ camera.position.y = 0
 camera.position.z = 2
 scene.add(camera)
 
+
 // Controls
-// const controls = new OrbitControls(camera, canvas)
-// controls.enableDamping = true
+const controls = new OrbitControls(camera, canvas)
+controls.enableDamping = true
 
 /**
  * Renderer
@@ -101,7 +133,8 @@ const tick = () =>
     const elapsedTime = clock.getElapsedTime()
 
     // Update objects
-    sphere.rotation.y = .5 * elapsedTime
+    sphere.rotation.y = .05 * elapsedTime
+    cloudCover.rotation.y = .08 * elapsedTime
 
     // Update Orbital Controls
     // controls.update()
