@@ -1,12 +1,14 @@
 import './style.css'
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { gsap } from 'gsap'
+import { ScrollTrigger} from 'gsap/ScrollTrigger'
 import * as dat from 'dat.gui'
 
+gsap.registerPlugin(ScrollTrigger);
 
 // globals
-let earthSpeed = 0.1
-let cloudSpeed = 0.11
+let earthSpeed = 0.02
+let cloudSpeed = 0.030
 
 // Debug
 const gui = new dat.GUI()
@@ -37,7 +39,7 @@ const landjpg = loader.load('/earth.jpg')
 
 // Mesh
 const earth = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 32 ,32),
+    new THREE.SphereGeometry(10, 32 ,32),
     new THREE.MeshPhongMaterial({
         map: landjpg,
         bumpMap: bumpjpg,
@@ -53,7 +55,7 @@ const earth = new THREE.Mesh(
 scene.add(earth)
 
 const cloudCover = new THREE.Mesh(
-    new THREE.SphereGeometry(.503, 32, 32),
+    new THREE.SphereGeometry(10.05, 32, 32),
     new THREE.MeshPhongMaterial({
         map: loader.load('./clouds.png'),
         transparent: true
@@ -69,7 +71,7 @@ const particleCount = 5000;
 const posArray = new Float32Array(particleCount * 3);
 
 for (let i = 0; i < particleCount * 3; i++) {
-    posArray[i] = (Math.random() - 0.5) * (Math.random() * 10);
+    posArray[i] = (Math.random() - 0.5) * (Math.random() * 300);
 }
 
 particleField.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
@@ -77,7 +79,7 @@ particleField.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
 const particlesMesh = new THREE.Points(
     particleField,
     new THREE.PointsMaterial({
-        size: 0.001
+        size: 0.01
     })
 )
 
@@ -86,7 +88,7 @@ scene.add(particlesMesh)
 // Lights
 
 const pointLight = new THREE.DirectionalLight(0xfffad9, 1.2)
-pointLight.position.set(10, 5, 10);
+pointLight.position.set(100, 50, 100);
 
 gui.add(pointLight.position, 'x')
 gui.add(pointLight.position, 'y')
@@ -121,29 +123,13 @@ window.addEventListener('resize', () =>
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
 
-let lastDir = 0
-document.addEventListener('scroll', (e) => {
-    const constantHeight = window.pageYOffset / window.innerHeight
-    console.log(constantHeight, lastDir)
-    if (window.innerHeight > lastDir) {
-        camera.rotation.z = constantHeight * 0.001;
-        camera.position.x += constantHeight * 0.1
-        console.log(camera.position.x)
-        // earthSpeed += 0.01
-    } else {
-        camera.rotation.z = constantHeight * 0.001;
-        camera.position.x -= constantHeight * 0.1
-        // earthSpeed -= 0.01
-    }
-    lastDir = window.pageYOffset
-})
 
 /**
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(120, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(0, 0, 0.8);
+const camera = new THREE.PerspectiveCamera(90, sizes.width / sizes.height, 0.1, 100)
+camera.position.set(0, 0, 20);
 scene.add(camera)
 
 
@@ -178,15 +164,33 @@ const tick = () =>
     earth.rotation.y = earthSpeed * elapsedTime
     cloudCover.rotation.y = cloudSpeed * elapsedTime
     camera.position.z += 0.00005
-
+    
     // Update Orbital Controls
     // controls.update()
-
+    
     // Render
     renderer.render(scene, camera)
-
+    
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)
 }
 
+
 tick()
+
+
+// Timeline
+
+let tl1 = gsap.timeline({
+    scrollTrigger: {
+        trigger: '.landing-container',
+        markers: true,
+        start: "bottom 100%",
+        end: "bottom 0%",
+        scrub: true,
+        pin: true
+    }
+});
+
+tl1.to(camera.position, {x: camera.position.x - 5, z: camera.position.z + 5, ease: 'power1.inOut'})
+tl1.to('.landing-container h1', {y: '-100vh'}, '-100%')
