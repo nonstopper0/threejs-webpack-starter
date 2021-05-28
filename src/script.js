@@ -188,9 +188,23 @@ let tl1 = gsap.timeline({
         start: "bottom 100%",
         end: "bottom 0%",
         scrub: true,
-        pin: true
-    }
+        pin: true,
+    },    
 });
 
-tl1.to(camera.position, {x: camera.position.x - 5, z: camera.position.z + 5, ease: 'power1.inOut'})
-tl1.to('.landing-container h1', {y: '-100vh'}, '-100%')
+tl1.to(camera.position, {
+    scrollTrigger: {
+        trigger: '.landing-container',
+        markers: true,
+        start: "bottom 100%",
+        end: "bottom 0%",
+        scrub: true,
+        pin: true,
+    },
+    x: camera.position.x - 10, 
+    z: camera.position.z + 5,
+    ease: 'power1.inOut'
+})
+
+
+

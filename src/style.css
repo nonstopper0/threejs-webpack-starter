@@ -85,10 +85,12 @@ body::-webkit-scrollbar {
 }
 
 .section-one {
-    max-width: 1300px;
-    margin: 200px auto;
     color: white;
     display: flex;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.835);
+    backdrop-filter: blur(10px);
+    padding: 200px 0px;
 }
 
 .left {
