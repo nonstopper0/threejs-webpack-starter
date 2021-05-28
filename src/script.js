@@ -2,12 +2,11 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
-import { Vector3 } from 'three'
 
 
 // globals
-let earthSpeed = 0.05
-let cloudSpeed = 0.06
+let earthSpeed = 0.1
+let cloudSpeed = 0.11
 
 // Debug
 const gui = new dat.GUI()
@@ -122,15 +121,22 @@ window.addEventListener('resize', () =>
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
 
-// document.addEventListener('wheel', (e) => {
-//     if (e.deltaY > 0) {
-//         camera.position.z += .01
-//         // earthSpeed += 0.01
-//     } else if (camera.position.z > 1) {
-//         camera.position.z -= .01
-//         // earthSpeed -= 0.01
-//     }
-// })
+let lastDir = 0
+document.addEventListener('scroll', (e) => {
+    const constantHeight = window.pageYOffset / window.innerHeight
+    console.log(constantHeight, lastDir)
+    if (window.innerHeight > lastDir) {
+        camera.rotation.z = constantHeight * 0.001;
+        camera.position.x += constantHeight * 0.1
+        console.log(camera.position.x)
+        // earthSpeed += 0.01
+    } else {
+        camera.rotation.z = constantHeight * 0.001;
+        camera.position.x -= constantHeight * 0.1
+        // earthSpeed -= 0.01
+    }
+    lastDir = window.pageYOffset
+})
 
 /**
  * Camera
@@ -171,7 +177,7 @@ const tick = () =>
     // Update objects
     earth.rotation.y = earthSpeed * elapsedTime
     cloudCover.rotation.y = cloudSpeed * elapsedTime
-    camera.position.z += 0.0005
+    camera.position.z += 0.00005
 
     // Update Orbital Controls
     // controls.update()

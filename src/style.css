@@ -54,7 +54,7 @@ body
 }
 
 .loading {
-    position: absolute;
+    position: fixed;
     width: 100%;
     height: 100%;
     color: white;
@@ -68,6 +68,27 @@ body
 
 .hidden {
     animation: loading-roll-up 1s ease forwards;
+}
+
+.placeholder {
+    height: 100vh;
+    width: 100vw;
+}
+
+.section-one {
+    max-width: 1300px;
+    margin: 200px auto;
+    color: white;
+    display: flex;
+
+}
+
+.left {
+    flex: 2;
+}
+
+.right {
+    flex: 2;
 }
 
 @keyframes loading-roll-up {
