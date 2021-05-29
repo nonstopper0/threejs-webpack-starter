@@ -28,7 +28,6 @@ body::-webkit-scrollbar {
 .container {
     position: absolute;
     width: 100%;
-    height: 1200vh;
 }
 
 .landing-container {
@@ -49,6 +48,7 @@ body::-webkit-scrollbar {
     font-size: 5rem;
     margin: 0px;
     font-weight: bold;
+    overflow: hidden;
 }
 
 .landing-container p {
@@ -67,21 +67,56 @@ body::-webkit-scrollbar {
     margin: 20px 0px;
 }
 
+/* Loading bar and screen CSS */ 
+
 .loading {
     position: fixed;
+    left: 0;
+    top: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     color: white;
-    background-color: rgb(63, 113, 170);
+    background-color: rgb(27, 27, 27);
     display: flex;
     align-items: center;
     justify-content: center;
-    top: 0%;
+    flex-direction: column;
     z-index: 999;
+    transition: transform 1s ease;
+}
+
+.loading-slider {
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
+    width: 300px; /* Full-width */
+    height: 25px; /* Specified height */
+    background: #4b4b4b; /* Grey background */
+    outline: none; /* Remove outline */
+    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.loading-slider-thumb {
+    transform: translate(-100%);
+    height: 100%;
+    background-color: white;
+    width: 100%;
+    transition: transform 1s ease;
 }
 
 .hidden {
-    animation: loading-roll-up 1s ease forwards;
+    transform: translateY(-100vh);
+}
+
+/* Section CSS */
+
+.section {
+    height: 100vh;
+    width: 100%;
 }
 
 .section-one {
@@ -90,8 +125,12 @@ body::-webkit-scrollbar {
     justify-content: center;
     align-items: center;
     text-align: center;
-    width: 100%;
-    padding: 200px 0px;
+    background-color: white;
+}
+
+.section-two {
+    background-color: transparent;
+    color: white;
 }
 
 .left {
@@ -111,6 +150,8 @@ body::-webkit-scrollbar {
     }
 }
 
+
+/* GUI MENU */
 .dg.ac {
     z-index: 100 !important;
 }
