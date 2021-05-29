@@ -3,12 +3,13 @@ import * as THREE from 'three'
 import { gsap } from 'gsap'
 import { ScrollTrigger} from 'gsap/ScrollTrigger'
 import * as dat from 'dat.gui'
+import { WebGLCapabilities, WebGLRenderer } from 'three'
 
 gsap.registerPlugin(ScrollTrigger);
 
 // globals
-let earthSpeed = 0.02
-let cloudSpeed = 0.030
+let earthSpeed = 0.0001
+let cloudSpeed = 0.00009
 
 // Debug
 const gui = new dat.GUI()
@@ -34,44 +35,47 @@ manager.onLoad = () => {
 const loader = new THREE.TextureLoader(manager);
 const waterpng = loader.load('./water.png');
 const bumpjpg = loader.load('./bump.jpg');
-const landjpg = loader.load('/earth.jpg')
-
+const landjpg = loader.load('./earthmap10.jpg');
+const clouds = loader.load('/clouds.jpg');
+const star = loader.load('/star.png');
+clouds.anisotropy = 8;
+landjpg.anisotropy = 8;
 
 // Mesh
-const earth = new THREE.Mesh(
-    new THREE.SphereGeometry(10, 32 ,32),
-    new THREE.MeshPhongMaterial({
-        map: landjpg,
-        bumpMap: bumpjpg,
-        bumpScale: 0.005,
-        specularMap: waterpng,
-        specular: new THREE.Color('grey'),
-        shininess: 1,
-        // emissiveMap: loader.load('./lights.png'),
-        // emissive: new THREE.Color('orange'),
-        // emissiveIntensity: 1
-    })
-)
-scene.add(earth)
 
-const cloudCover = new THREE.Mesh(
-    new THREE.SphereGeometry(10.05, 32, 32),
-    new THREE.MeshPhongMaterial({
-        map: loader.load('./clouds.png'),
-        transparent: true
-    })
-)
-scene.add(cloudCover);
+let earthGeometry = new THREE.SphereGeometry(500, 64 ,64)
+let earthMaterial = new THREE.MeshPhongMaterial({
+    map: landjpg,
+    bumpMap: bumpjpg,
+    bumpScale: 1,
+    // specularMap: waterpng,
+    // specular: new THREE.Color('white'),
+    // shininess: .1,
+    emissiveMap: loader.load('./lights.png'),
+    emissive: new THREE.Color('orange'),
+    emissiveIntensity: .1
+})
+const earth = new THREE.Mesh(earthGeometry, earthMaterial)
+
+let cloudGeometry = new THREE.SphereGeometry(502, 64, 64)
+let cloudMaterial = new THREE.MeshPhongMaterial({
+    alphaMap: clouds,
+    transparent: true
+})
+const cloudCover = new THREE.Mesh(cloudGeometry, cloudMaterial)
 
 
+
+
+scene.add(earth, cloudCover)
 // stars 
 
 const particleField = new THREE.BufferGeometry;
-const particleCount = 5000;
+const particleCount = 1000;
 const posArray = new Float32Array(particleCount * 3);
 
 for (let i = 0; i < particleCount * 3; i++) {
-    posArray[i] = (Math.random() - 0.5) * (Math.random() * 300);
+    posArray[i] = (Math.random() - 0.05) * (Math.random() * 20000);
 }
 
 particleField.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
@@ -79,7 +83,9 @@ particleField.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
 const particlesMesh = new THREE.Points(
     particleField,
     new THREE.PointsMaterial({
-        size: 0.01
+        size: 1,
+        map: star,
+        transparent: true
     })
 )
 
@@ -88,7 +94,7 @@ scene.add(particlesMesh)
 // Lights
 
 const pointLight = new THREE.DirectionalLight(0xfffad9, 1.2)
-pointLight.position.set(100, 50, 100);
+pointLight.position.set(200, 100, 100);
 
 gui.add(pointLight.position, 'x')
 gui.add(pointLight.position, 'y')
@@ -128,8 +134,8 @@ window.addEventListener('resize', () =>
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(90, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(0, 0, 20);
+const camera = new THREE.PerspectiveCamera(30, sizes.width / sizes.height, 0.1, 40000)
+camera.position.set(0, 0, 1500);
 scene.add(camera)
 
 
@@ -145,7 +151,8 @@ scene.add(camera)
  */
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
-    alpha: true
+    alpha: true,    
+    antialias: true,
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -161,9 +168,8 @@ const tick = () =>
     const elapsedTime = clock.getElapsedTime()
     
     // Update objects
-    earth.rotation.y = earthSpeed * elapsedTime
-    cloudCover.rotation.y = cloudSpeed * elapsedTime
-    camera.position.z += 0.00005
+    earth.rotation.y += earthSpeed;
+    cloudCover.rotation.y += cloudSpeed;
     
     // Update Orbital Controls
     // controls.update()
@@ -188,21 +194,19 @@ let tl1 = gsap.timeline({
         start: "bottom 100%",
         end: "bottom 0%",
         scrub: true,
-        pin: true,
+        pin: false,
     },    
 });
 
-tl1.to(camera.position, {
+tl1.to(earth.rotation, {
     scrollTrigger: {
         trigger: '.landing-container',
         markers: true,
-        start: "bottom 100%",
+        start: "top 100%",
         end: "bottom 0%",
         scrub: true,
-        pin: true,
     },
-    x: camera.position.x - 10, 
-    z: camera.position.z + 5,
+    y: earth.rotation.y + 5,
     ease: 'power1.inOut'
 })
 

@@ -87,9 +87,10 @@ body::-webkit-scrollbar {
 .section-one {
     color: white;
     display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
     width: 100%;
-    background-color: rgba(255, 255, 255, 0.835);
-    backdrop-filter: blur(10px);
     padding: 200px 0px;
 }
 
@@ -108,4 +109,8 @@ body::-webkit-scrollbar {
     to {
         top: -100%;
     }
+}
+
+.dg.ac {
+    z-index: 100 !important;
 }
