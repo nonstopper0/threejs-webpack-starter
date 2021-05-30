@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import * as dat from 'dat.gui'
 import { NoToneMapping, Vector3 } from 'three'
-import { TweenLite } from 'gsap/all'
+import { TweenLite, TweenMax } from 'gsap/all'
 import { gsap } from 'gsap'
 import { ScrollTrigger} from 'gsap/ScrollTrigger'
 
@@ -12,7 +12,7 @@ import { ScrollTrigger} from 'gsap/ScrollTrigger'
 // Initialization Variables ------------------------------------------------------------
 
 const clock = new THREE.Clock()
-const gui = new dat.GUI()
+// const gui = new dat.GUI()
 const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 const sizes = { width: window.innerWidth, height: window.innerHeight }
@@ -146,17 +146,12 @@ function lights() {
     binLight.position.set(0, 200, 1500);
     binLight.distance = 500;
 
-    gui.add(binLight.position, 'x');
-    gui.add(binLight.position, 'y');
-    gui.add(binLight.position, 'z');
-
-    
     scene.add(pointLight, binLight);
 }
 
 
 window.addEventListener('resize', resizeHandler)
-window.addEventListener('mousemove', mouseMoveHanlder)
+// window.addEventListener('mousemove', mouseMoveHanlder)
 
 function resizeHandler() {
     // Update sizes
@@ -185,6 +180,21 @@ function resizeHandler() {
     // }
 }
 
+let lastMove = 0
+function mouseMoveHanlder(e) {
+    // Debouncer
+    if (e.timeStamp - lastMove < 10) {
+        return
+    }
+
+    let x = (e.clientX / window.innerWidth - 0.5).toFixed(2) * 1000
+    let y = (e.clientY / window.innerHeight - 0.5).toFixed(2) * 1000
+    lastMove = e.timeStamp
+    pointLight.position.x = x;
+    pointLight.position.y = -y;
+    pointLight.updateMatrixWorld();
+}
+
 /**
  * Animate
  */
@@ -206,18 +216,6 @@ const tick = () =>
     window.requestAnimationFrame(tick);
 }
 
-let lastMove = 0
-function mouseMoveHanlder(e) {
-    // Debouncer
-    if (e.timeStamp - lastMove < 10) {
-        return
-    }
-
-    let x = (e.clientX / window.innerWidth).toFixed(2)
-    let y = (e.clientY / window.innerHeight).toFixed(2)
-    console.log(x, y);
-    lastMove = e.timeStamp
-}
 
 function timeline() {
 
@@ -312,6 +310,16 @@ function timeline() {
                 end: '+=100%',
             }
         })
+        .to(bin.rotation, {
+            y: .5,
+            scrollTrigger: {
+                immediateRender: false,
+                trigger: '.section-one',
+                start: 'top 10%',
+                end: '+=100%',
+                scrub: 2
+            }
+        })
         .to('.section-one .left', {
             ease: 'none',
             opacity: 0,
@@ -334,17 +342,17 @@ function timeline() {
                 scrub: 1
             },
         })
-        .to(pointLight.position, {
-            x: -500,
-            z: -100,
-            scrollTrigger: {
-                immediateRender: false,
-                trigger: '.section-two',
-                start: 'top bottom',
-                end: '+=100%',
-                scrub: 1
-            },            
-        })
+        // .to(pointLight.position, {
+        //     x: -500,
+        //     z: -100,
+        //     scrollTrigger: {
+        //         immediateRender: false,
+        //         trigger: '.section-two',
+        //         start: 'top bottom',
+        //         end: '+=100%',
+        //         scrub: 1
+        //     },            
+        // })
         .to(phone.scale, {
             x: .1,
             y: .1,
@@ -359,9 +367,9 @@ function timeline() {
             },            
         })
         .to(phone.rotation, {
-            x: -1.1,
+            x: -.9,
             y: 6.7,
-            z: .1,
+            z: .2,
             ease: 'power1.out',
             scrollTrigger: {
                 immediateRender: false,
