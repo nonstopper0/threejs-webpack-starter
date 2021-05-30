@@ -265,18 +265,6 @@ function timeline() {
                 end: '+=100%',
             }
         })
-    // section-two inbetween
-        // .to(bin, {
-        //     x: 0,
-        //     y: 0,
-        //     z: 0,
-        //     scrollTrigger: {
-        //         immediateRender: false,
-        //         trigger: '.section-two',
-        //         start: 'top bottom',
-        //         end: '+=30%',
-        //     }
-        // })
         .to(camera.position, {
             z: camera.position.z - 400,
             scrollTrigger: {
