@@ -145,24 +145,22 @@ header nav a {
 .section-one {
     color: white;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    text-align: center;
-    width: 100%;
 }
 
-.section-one .left {
-    flex: 2;
-    font-size: 1.5rem;
+.left {
+    width: 50%;
+    font-size: 1.2rem;
     padding-left: 10%;
     box-sizing: border-box
 }
 
-.section-one .left div {
+.left div {
     text-align: left
 }
 
-.section-one .left div h3 {
+.left div h3 {
     font-size: 3rem;
 }
 
@@ -170,11 +168,24 @@ header nav a {
     background-color: transparent;
     color: white;
     height: 100vh;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 
 .right {
-    flex: 2;
+    width: 50%;
+    font-size: 1.2rem;
+    padding-right: 10%;
+}
+
+.right div h3 {
+    font-size: 2rem;
+}
+
+.right div {
+    text-align: right;
 }
 
 @keyframes loading-roll-up {
@@ -190,4 +201,15 @@ header nav a {
 /* GUI MENU */
 .dg.ac {
     z-index: 100 !important;
+}
+
+@media only screen and (max-width: 480px) {
+    .section-one, .section-two {
+        justify-content: center;
+    }
+    .left, .right {
+        text-align: center;
+        width: 100%
+    }
+    
 }

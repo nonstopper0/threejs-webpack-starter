@@ -147,7 +147,6 @@ function lights() {
 }
 
 
-
 window.addEventListener('resize', resizeHandler)
 
 function resizeHandler() {
@@ -162,6 +161,17 @@ function resizeHandler() {
     // Update renderer
     renderer.setSize(sizes.width, sizes.height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))   
+
+    // Update Model scale
+    if (sizes.width < 480) {
+        earth.scale.set(0.2, 0.2, 0.2);
+        bin.scale.set(0.2, 0.2, 0.2);
+        cloudCover.scale.set(0.2, 0.2, 0.2);
+    } else if (sizes.width > 480 && earth.scale.y === 0.2) {
+        earth.scale.set(1, 1, 1);
+        bin.scale.set(1, 1, 1);
+        cloudCover.scale.set(1, 1, 1);
+    }
 }
 
 /**
@@ -223,6 +233,7 @@ function timeline() {
                 trigger: '.landing-container',
                 start: 'top top',
                 end: '+=100%',
+                anticipatePin: 4,
                 pin: true
             }
         })
@@ -242,17 +253,29 @@ function timeline() {
             z: .6,
             scrollTrigger: binTrigger      
         })
+        .from('.section-one .left', {
+            ease: 'none',
+            opacity: 0,
+            scrollTrigger: {
+                trigger: '.section-one',
+                start: 'bottom bottom',
+                end: 'bottom bottom',
+                immediateRender: false,
+                scrub: 1
+            }
+        })
     // section-one
         .to('.section-one .left', {
             ease: 'none',
             y: '-100%',
+            duration: 1,
             scrollTrigger: {
                 immediateRender: false,
                 trigger: '.section-one',
                 start: 'top top',
                 end: '+=100%',
                 pin: true,
-                scrub: 1
+                anticipatePin: 1,
             }
         })
         .to(binLight.position, {
@@ -265,6 +288,18 @@ function timeline() {
                 end: '+=100%',
             }
         })
+        .to('.section-one .left', {
+            ease: 'none',
+            opacity: 0,
+            scrollTrigger: {
+                trigger: '.section-two',
+                start: 'top bottom',
+                end: 'top bottom',
+                immediateRender: false,
+                scrub: 1     
+            }
+        })
+    // section-two In-betweeen
         .to(camera.position, {
             z: camera.position.z - 400,
             scrollTrigger: {
@@ -275,6 +310,28 @@ function timeline() {
                 scrub: 1
             },
         })
+        .to(pointLight.position, {
+            x: -500,
+            z: -100,
+            scrollTrigger: {
+                immediateRender: false,
+                trigger: '.section-two',
+                start: 'top bottom',
+                end: '+=100%',
+                scrub: 1
+            },            
+        })
+        .from('.section-two .right', {
+            ease: 'none',
+            opacity: 0,
+            scrollTrigger: {
+                trigger: '.section-two',
+                start: 'bottom bottom',
+                end: 'bottom bottom',
+                immediateRender: false,
+                scrub: 1
+            }
+        })
     // section-two
         .to('.section-two', {
             scrollTrigger: {
@@ -282,13 +339,12 @@ function timeline() {
                 trigger: '.section-two',
                 start: 'top top',
                 end: '+=100%',
-                pin: true
+                pin: true,
             }
         })
         .to(camera.position, {
             y: camera.position.y + 100,
             scrollTrigger: {}
         })
-    console.log(document.querySelector('.section-one .left h3'));
 
 }
