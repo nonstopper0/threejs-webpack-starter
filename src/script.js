@@ -20,6 +20,7 @@ const sizes = { width: window.innerWidth, height: window.innerHeight }
 let earthSpeed = 0.0001
 let cloudSpeed = 0.00009
 let bin;
+let phone;
 let earth;
 let cloudCover;
 let pointLight;
@@ -50,7 +51,7 @@ manager.onProgress = (url, loaded, total) => {
     loadingText.innerText = 'Loading... ' + loaded + '/' + total;
 }
 manager.onLoad = () => {
-    scene.add(bin, cloudCover, earth);
+    scene.add(bin, cloudCover, earth, phone);
     lights();
     console.log('all items loaded succesfully...');
     document.querySelector('.loading').classList.add('hidden');
@@ -68,6 +69,11 @@ modelLoader.load('./models/recycling_bin/scene.gltf', (gltf) => {
     bin.rotation.x = -1.5;
     bin.castShadow = true;
     bin.receiveShadow = true;
+})
+
+modelLoader.load('./models/apple_iphone_11_pro/scene.gltf', (gltf) => {
+    phone = gltf.scene.children[0];
+    phone.position.set(0, 0, 1496);
 })
 
 
