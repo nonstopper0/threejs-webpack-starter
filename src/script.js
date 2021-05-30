@@ -77,8 +77,8 @@ const texLoader = new THREE.TextureLoader(manager);
 const waterpng = texLoader.load('./water.png');
 const bumpjpg = texLoader.load('./bump.jpg');
 const landjpg = texLoader.load('./earthmap10.jpg');
-const clouds = texLoader.load('/clouds.jpg');
-const star = texLoader.load('/star.png');
+const clouds = texLoader.load('./clouds.jpg');
+const star = texLoader.load('./star.png');
 clouds.anisotropy = 8;
 landjpg.anisotropy = 8;
 
