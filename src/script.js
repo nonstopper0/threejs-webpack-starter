@@ -73,7 +73,9 @@ modelLoader.load('./models/recycling_bin/scene.gltf', (gltf) => {
 
 modelLoader.load('./models/apple_iphone_11_pro/scene.gltf', (gltf) => {
     phone = gltf.scene.children[0];
-    phone.position.set(0, 0, 1496);
+    phone.position.set(-(window.innerWidth / 300), 0, 1075);
+    phone.rotation.set(0, 0, 0);
+    phone.scale.set(0, 0, 0);
 })
 
 
@@ -154,6 +156,7 @@ function lights() {
 
 
 window.addEventListener('resize', resizeHandler)
+window.addEventListener('mousemove', mouseMoveHanlder)
 
 function resizeHandler() {
     // Update sizes
@@ -167,17 +170,19 @@ function resizeHandler() {
     // Update renderer
     renderer.setSize(sizes.width, sizes.height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))   
+    
 
+    phone.position.x = -(window.innerWidth / 300)
     // Update Model scale
-    if (sizes.width < 480) {
-        earth.scale.set(0.2, 0.2, 0.2);
-        bin.scale.set(0.2, 0.2, 0.2);
-        cloudCover.scale.set(0.2, 0.2, 0.2);
-    } else if (sizes.width > 480 && earth.scale.y === 0.2) {
-        earth.scale.set(1, 1, 1);
-        bin.scale.set(1, 1, 1);
-        cloudCover.scale.set(1, 1, 1);
-    }
+    // if (sizes.width < 480) {
+    //     earth.scale.set(0.2, 0.2, 0.2);
+    //     bin.scale.set(0.2, 0.2, 0.2);
+    //     cloudCover.scale.set(0.2, 0.2, 0.2);
+    // } else if (sizes.width > 480 && earth.scale.y === 0.2) {
+    //     earth.scale.set(1, 1, 1);
+    //     bin.scale.set(1, 1, 1);
+    //     cloudCover.scale.set(1, 1, 1);
+    // }
 }
 
 /**
@@ -192,6 +197,7 @@ const tick = () =>
     earth.rotation.y += earthSpeed;
     cloudCover.rotation.y += cloudSpeed;
     bin.position.y != camera.position.y && (bin.position.y = camera.position.y)
+    phone.position.y != camera.position.y && (phone.position.y = camera.position.y);
 
     // Render
     renderer.render(scene, camera);
@@ -200,6 +206,18 @@ const tick = () =>
     window.requestAnimationFrame(tick);
 }
 
+let lastMove = 0
+function mouseMoveHanlder(e) {
+    // Debouncer
+    if (e.timeStamp - lastMove < 10) {
+        return
+    }
+
+    let x = (e.clientX / window.innerWidth).toFixed(2)
+    let y = (e.clientY / window.innerHeight).toFixed(2)
+    console.log(x, y);
+    lastMove = e.timeStamp
+}
 
 function timeline() {
 
@@ -327,6 +345,32 @@ function timeline() {
                 scrub: 1
             },            
         })
+        .to(phone.scale, {
+            x: .1,
+            y: .1,
+            z: .1,
+            ease: 'power1.out',
+            scrollTrigger: {
+                immediateRender: false,
+                trigger: '.section-two',
+                start: 'top top',
+                end: '+=50%',
+                scrub: 3
+            },            
+        })
+        .to(phone.rotation, {
+            x: -1.1,
+            y: 6.7,
+            z: .1,
+            ease: 'power1.out',
+            scrollTrigger: {
+                immediateRender: false,
+                trigger: '.section-two',
+                start: 'top top',
+                end: '+=50%',
+                scrub: 3
+            },            
+        })
         .from('.section-two .right', {
             ease: 'none',
             opacity: 0,
@@ -335,7 +379,7 @@ function timeline() {
                 start: 'bottom bottom',
                 end: 'bottom bottom',
                 immediateRender: false,
-                scrub: 1
+                scrub: 1,
             }
         })
     // section-two
