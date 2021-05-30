@@ -1,11 +1,12 @@
 import './style.css'
 import * as THREE from 'three'
-import { gsap } from 'gsap'
-import { ScrollTrigger} from 'gsap/ScrollTrigger'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import * as dat from 'dat.gui'
 import { Vector3 } from 'three'
 import { TweenLite } from 'gsap/all'
+import { gsap } from 'gsap'
+import { ScrollTrigger} from 'gsap/ScrollTrigger'
+
 
 
 // Initialization Variables ------------------------------------------------------------
@@ -21,8 +22,10 @@ let cloudSpeed = 0.00009
 let bin;
 let earth;
 let cloudCover;
+let pointLight;
+let binLight;
 
-const camera = new THREE.PerspectiveCamera(30, sizes.width / sizes.height, 0.1, 40000)
+const camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 0.1, 40000)
 camera.position.set(0, 0, 1500);
 scene.add(camera)
 
@@ -48,11 +51,12 @@ manager.onProgress = (url, loaded, total) => {
 }
 manager.onLoad = () => {
     scene.add(bin, cloudCover, earth);
+    lights();
     console.log('all items loaded succesfully...');
     document.querySelector('.loading').classList.add('hidden');
     document.querySelector('body').style.overflow = 'auto'
     tick();
-    timeLine();
+    timeline();
 }
 
 const modelLoader = new GLTFLoader(manager);
@@ -60,8 +64,8 @@ const modelLoader = new GLTFLoader(manager);
 modelLoader.load('./models/recycling_bin/scene.gltf', (gltf) => {
     bin = gltf.scene.children[0]
     bin.position.set(1, 0, 1490);
-    bin.rotation.y = .5
-    bin.rotation.x = -.2
+    bin.rotation.y = .4
+    bin.rotation.x = -1.5;
     bin.castShadow = true;
     bin.receiveShadow = true;
 })
@@ -125,16 +129,23 @@ scene.add(particlesMesh)
 
 // Lights
 
-const pointLight = new THREE.DirectionalLight(0xfffad9, 1.2)
-pointLight.position.set(200, 100, 100);
-pointLight.castShadow = true;
+function lights() {
+    pointLight = new THREE.DirectionalLight(0xfffad9, 1)
+    pointLight.position.set(200, 100, 100);
+    pointLight.castShadow = true;
 
-gui.add(pointLight.position, 'x')
-gui.add(pointLight.position, 'y')
-gui.add(pointLight.position, 'z')
-gui.add(pointLight, 'intensity')
+    binLight = new THREE.PointLight(0xffffff, 2)
+    binLight.position.set(camera.position.x - 40, camera.position.y - 40, camera.position.y + 40);
+    binLight.distance = 0;
+    let binLightHelper = new THREE.PointLightHelper(binLight, 20);
 
-scene.add(pointLight);
+    gui.add(binLight.position, 'x');
+    gui.add(binLight.position, 'y');
+    gui.add(binLight.position, 'z');
+
+    
+    scene.add(pointLight, binLight, binLightHelper);
+}
 
 
 
@@ -148,8 +159,6 @@ function resizeHandler() {
     // Update camera
     camera.aspect = sizes.width / sizes.height
     camera.updateProjectionMatrix()
-
-    Vector3.lerp()
 
     // Update renderer
     renderer.setSize(sizes.width, sizes.height)
@@ -167,7 +176,9 @@ const tick = () =>
     // Update objects
     earth.rotation.y += earthSpeed;
     cloudCover.rotation.y += cloudSpeed;
-     
+    bin.rotateZ(.005);   
+    bin.rotateX(0.0005);  
+
     // Render
     renderer.render(scene, camera);
     
@@ -176,13 +187,15 @@ const tick = () =>
 }
 
 
-function timeLine() {
+function timeline() {
+
     gsap.registerPlugin(ScrollTrigger)
 
     ScrollTrigger.defaults({
         immediateRender: false,
         ease: 'power1.inOut',
         scrub: 1,
+        markers: true
     })
 
     let textTL = gsap.timeline({});
@@ -190,24 +203,43 @@ function timeLine() {
         .from(".landing-container div p", {y: -10, duration: 2, opacity: 0, ease: 'expo.out'}, "-=2")
         .from(".landing-container div button", {y: 20, duration: 2, opacity: 0, ease: 'expo.out'}, "-=2")
 
+    ScrollTrigger.create({
+        id: 'first',
+        trigger: '.landing-container',
+        markers: true,
+        start: "top top",
+        end: "+=100%",
+        pin: true
+    })
 
-
-    let tl1 = gsap.timeline();
-    tl1.from(camera.rotation, {
+    ScrollTrigger.create({
+        id: 'second',
+        trigger: '.section-one',
+        start: "top top",
+        end: "+=100%",
+        pin: true
+    })
+    
+    let tl = gsap.timeline();
+    tl.from(camera.rotation, {
         x: .05,
         duration: 5,
     })
-
-    let recycleTL = gsap.timeline({
-        scrollTrigger: {
-            trigger: '.container',
-            markers: true,
-            start: 'top top',
-            end: 'bottom bottom',
-        }
+    tl.to('.landing-container div', {
+        y: '-100%',
+        ease: 'power1',
+        scrollTrigger: 'first'
+    })
+    tl.to(camera.position, {
+        z: camera.position.z - 5,
+        scrollTrigger: 'first'
+    })
+    tl.to(bin.rotation, {
+        x: 5,
+        scrollTrigger: 'first'
+    })
+    tl.to('.section-one', {
+        scrollTrigger: 'second'
     })
 
-    recycleTL.to(bin.rotation, {
-        x: 5
-    }, 'sim')
 }

@@ -125,7 +125,7 @@ body::-webkit-scrollbar {
     justify-content: center;
     align-items: center;
     text-align: center;
-    background-color: white;
+    backdrop-filter: blur(10px);
 }
 
 .section-two {
