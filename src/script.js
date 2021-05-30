@@ -3,8 +3,9 @@ import * as THREE from 'three'
 import { gsap } from 'gsap'
 import { ScrollTrigger} from 'gsap/ScrollTrigger'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import * as dat from 'dat.gui'
+import { Vector3 } from 'three'
+import { TweenLite } from 'gsap/all'
 
 
 // Initialization Variables ------------------------------------------------------------
@@ -18,6 +19,8 @@ const sizes = { width: window.innerWidth, height: window.innerHeight }
 let earthSpeed = 0.0001
 let cloudSpeed = 0.00009
 let bin;
+let earth;
+let cloudCover;
 
 const camera = new THREE.PerspectiveCamera(30, sizes.width / sizes.height, 0.1, 40000)
 camera.position.set(0, 0, 1500);
@@ -30,8 +33,6 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-const controls = new OrbitControls(camera, document.querySelector('.landing-container'))
 
 // Loaders ------------------------------------------------------------
 
@@ -46,19 +47,23 @@ manager.onProgress = (url, loaded, total) => {
     loadingText.innerText = 'Loading... ' + loaded + '/' + total;
 }
 manager.onLoad = () => {
+    scene.add(bin, cloudCover, earth);
     console.log('all items loaded succesfully...');
     document.querySelector('.loading').classList.add('hidden');
     document.querySelector('body').style.overflow = 'auto'
     tick();
-    tl1.play();
-    tl.play();
-    scene.add(bin);
+    timeLine();
 }
 
 const modelLoader = new GLTFLoader(manager);
 
-const recycleBin = modelLoader.load('./models/recycling_bin/scene.gltf', (gltf) => {
+modelLoader.load('./models/recycling_bin/scene.gltf', (gltf) => {
     bin = gltf.scene.children[0]
+    bin.position.set(1, 0, 1490);
+    bin.rotation.y = .5
+    bin.rotation.x = -.2
+    bin.castShadow = true;
+    bin.receiveShadow = true;
 })
 
 
@@ -79,26 +84,20 @@ let earthGeometry = new THREE.SphereGeometry(500, 64 ,64)
 let earthMaterial = new THREE.MeshPhongMaterial({
     map: landjpg,
     bumpMap: bumpjpg,
-    bumpScale: 1,
-    // specularMap: waterpng,
-    // specular: new THREE.Color('white'),
-    // shininess: .1,
-    emissiveMap: texLoader.load('./lights.png'),
-    emissive: new THREE.Color('orange'),
-    emissiveIntensity: .1
+    bumpScale: 1.5,
+    specularMap: waterpng,
+    specular: 0.5,
 })
-const earth = new THREE.Mesh(earthGeometry, earthMaterial)
+
+earth = new THREE.Mesh(earthGeometry, earthMaterial)
 
 let cloudGeometry = new THREE.SphereGeometry(502, 64, 64)
 let cloudMaterial = new THREE.MeshPhongMaterial({
     alphaMap: clouds,
     transparent: true
 })
-const cloudCover = new THREE.Mesh(cloudGeometry, cloudMaterial)
 
-
-scene.add(cloudCover, earth)
-
+cloudCover = new THREE.Mesh(cloudGeometry, cloudMaterial)
 
 
 // stars 
@@ -128,6 +127,7 @@ scene.add(particlesMesh)
 
 const pointLight = new THREE.DirectionalLight(0xfffad9, 1.2)
 pointLight.position.set(200, 100, 100);
+pointLight.castShadow = true;
 
 gui.add(pointLight.position, 'x')
 gui.add(pointLight.position, 'y')
@@ -135,6 +135,7 @@ gui.add(pointLight.position, 'z')
 gui.add(pointLight, 'intensity')
 
 scene.add(pointLight);
+
 
 
 window.addEventListener('resize', resizeHandler)
@@ -147,6 +148,8 @@ function resizeHandler() {
     // Update camera
     camera.aspect = sizes.width / sizes.height
     camera.updateProjectionMatrix()
+
+    Vector3.lerp()
 
     // Update renderer
     renderer.setSize(sizes.width, sizes.height)
@@ -167,38 +170,44 @@ const tick = () =>
      
     // Render
     renderer.render(scene, camera);
-
-    // Controls
-    controls.update();
     
     // Call tick again on the next frame
     window.requestAnimationFrame(tick);
 }
 
 
-// Timeline
+function timeLine() {
+    gsap.registerPlugin(ScrollTrigger)
 
-gsap.registerPlugin(ScrollTrigger)
+    ScrollTrigger.defaults({
+        immediateRender: false,
+        ease: 'power1.inOut',
+        scrub: 1,
+    })
 
-let tl1 = gsap.timeline({
-    pasued: true,
-    scrollTrigger: {
-        trigger: '.landing-container',
-        markers: true,
-        start: "top top",
-        end: "+=100%",
-        pin: true
-    },    
-});
-tl1.to(camera.position, {
-    x: -window.innerWidth / 10,
-    z: 2000,
-    duration: 10,
-    ease: 'power1.inOut',
-})
+    let textTL = gsap.timeline({});
+    textTL.from(".landing-container div h1", { y: -100, opacity: 0, duration: 3, ease: 'expo.out'})
+        .from(".landing-container div p", {y: -10, duration: 2, opacity: 0, ease: 'expo.out'}, "-=2")
+        .from(".landing-container div button", {y: 20, duration: 2, opacity: 0, ease: 'expo.out'}, "-=2")
 
 
-let tl = gsap.timeline({
-    paused: true
-});
-tl.from(".landing-container div h1", { y: -100, opacity: 0, duration: 2, ease: 'power3.inOut'  })
+
+    let tl1 = gsap.timeline();
+    tl1.from(camera.rotation, {
+        x: .05,
+        duration: 5,
+    })
+
+    let recycleTL = gsap.timeline({
+        scrollTrigger: {
+            trigger: '.container',
+            markers: true,
+            start: 'top top',
+            end: 'bottom bottom',
+        }
+    })
+
+    recycleTL.to(bin.rotation, {
+        x: 5
+    }, 'sim')
+}
